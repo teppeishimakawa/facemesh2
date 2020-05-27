@@ -4,7 +4,7 @@
 <head>
 <title>facemesh_rot</title>
 <script src="https://cdn.jsdelivr.net/npm/three@0.106.2/build/three.min.js"></script>
-<script src="./stats.min.js"></script>
+<!--script src="./stats.min.js"></script-->
 <script src="https://cdn.jsdelivr.net/npm/scatter-gl@0.0.1/lib/scatter-gl.min.js"></script>
 <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
 
@@ -66,6 +66,9 @@ body {
   color: red;
   opacity: 0.9;
 }
+
+
+}
 </style>
 </head>
 <body>
@@ -112,6 +115,8 @@ body {
 </body>
 
 <script>
+
+
 
 /*
     AFRAME.registerComponent('draw-canvas', {
@@ -499,8 +504,8 @@ async function setupCamera() {
       facingMode: 'user',
       // Only setting the video to a specified size in order to accommodate a
       // point cloud, so on mobile devices accept the default size.
-      width: mobile ? undefined : VIDEO_SIZE,
-      height: mobile ? undefined : VIDEO_SIZE} };
+      width: mobile ? VIDEO_SIZE : VIDEO_SIZE,
+      height: mobile ? VIDEO_SIZE : VIDEO_SIZE} };
 
   const stream = await navigator.mediaDevices.getUserMedia(constraints);
   video.srcObject = stream;
