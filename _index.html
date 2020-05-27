@@ -1,0 +1,294 @@
+
+<html>
+<head>
+<script src="https://cdn.jsdelivr.net/npm/three@0.106.2/build/three.min.js"></script>
+<script src="./stats.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/scatter-gl@0.0.1/lib/scatter-gl.min.js"></script>
+<script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+<script src="https://docs.opencv.org/3.4.1/opencv.js"></script>
+<style>
+
+#scatter-gl-container,.canvas-wrapper{
+position: relative;
+display:inline-block;
+vertical-align:top;
+}
+
+#scatter-gl-container{
+border:1px solid#000;
+position:relative;
+width:270px;height:270px;
+}
+
+.canvas-wrapper canvas {
+transform:translate3d(-50%,-50%,0);
+left:50%;
+top:50%;
+position:absolute;
+}
+
+#output1
+{
+filter: blur(5px) opacity(35%);
+}
+
+</style>
+</head>
+
+<body>
+
+
+  <video id="video" name="video" playsinline="" style="
+   -webkit-transform:scaleX(-1);
+   transform:scaleX(-1);
+   visibility:hidden;
+   width:300px;height:300px;">
+  </video>
+
+  <a-scene background="color: #FAFAFA" stats>
+
+   <a-camera look-controls-enabled="false" wasd-controls-enabled="false" position="0 0 0"></a-camera>
+   <a-assets>
+    <img id="img" src="./cxm.png" style="
+   -webkit-transform:scaleX(-1);
+   transform:scaleX(-1);
+   visibility:hidden;
+   width:300px;height:300px;">
+   </a-assets>
+   <a-plane position="0 1 -4" rotation="0 0 0" scale="-1 1 1" width="4" height="4" src="#video" ></a-plane>
+   <a-entity id="face" position="1.5 3 -3.5" rotation="0 0 0" scale="-0.01 -0.01 -0.01"></a-entity>
+
+  </a-scene>
+
+<br>
+
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.6/dat.gui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/facemesh"></script>
+<script>
+
+let scatterGLHasInitialized = false, scatterGL;
+let ctx,videoWidth, videoHeight, video, canvas,canvas1;
+
+const stats = new Stats();
+var color=[255, 70, 0, 1]; 
+
+
+function isMobile()
+{
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  return isAndroid || isiOS;
+}
+
+const VIDEO_SIZE = 300;
+const mobile = isMobile();
+
+
+/*
+function drawPath(ctx, points, closePath) 
+{
+  const region = new Path2D();
+  region.moveTo(points[0][0], points[0][1]);
+  for (let i = 1; i < points.length; i++) 
+  {
+    const point = points[i];
+    region.lineTo(point[0], point[1]);
+  }
+  if (closePath) {region.closePath();}
+  //ctx.stroke(region);
+  ctx.fill(region);
+}
+*/
+
+
+      window.onload = function()
+      {
+        navigator.mediaDevices = navigator.mediaDevices || ((navigator.mozGetUserMedia || navigator.webkitGetUserMedia) ?
+        {
+           getUserMedia: function(c) {
+             return new Promise(function(y, n) {
+               (navigator.mozGetUserMedia ||
+                navigator.webkitGetUserMedia).call(navigator, c, y, n);
+             });
+           }
+        } : null);
+
+        if (!navigator.mediaDevices)
+        {
+          console.log("getUserMedia() not supported.");
+          return;
+        }
+        var constraints = { audio: false, video: {
+      facingMode: 'user',
+      // Only setting the video to a specified size in order to accommodate a
+      // point cloud, so on mobile devices accept the default size.
+      width: mobile ? undefined : VIDEO_SIZE,
+      height: mobile ? undefined : VIDEO_SIZE} };
+
+        navigator.mediaDevices.getUserMedia(constraints)
+        .then(function(stream)
+  {
+          var video = document.querySelector('video');
+          video.srcObject = stream
+          video.onloadedmetadata = function(e) {
+            video.play();
+
+　//videWidth,videHeight:再生している動画サイズ
+  videoWidth = video.videoWidth;
+  videoHeight = video.videoHeight;
+  video.width = videoWidth;
+  video.height = videoHeight;
+
+/*
+  canvas1 = document.getElementById('output1');
+  canvas1.width = videoWidth;
+  canvas1.height = videoHeight;
+*/
+
+/*
+  ctx1 = canvas1.getContext('2d');
+  ctx1.translate(canvas.width, 0);
+  ctx1.scale(-1, 1);
+
+
+
+        ctx1.fillStyle = "rgba(" + color + ")";
+        //ctx1.strokeStyle = "rgba(" + [255, 100, 70, 0.15] + ")";
+        ctx1.lineWidth = 0.1;
+        //ctx1.filter = 'blur(2px)';
+*/
+    main();
+    };
+  })
+        .catch(function(err) {
+          console.log(err.name + ": " + err.message);
+        });
+
+      }
+
+
+// Each face object contains a `scaledMesh` property,
+// which is an array of 468 landmarks.
+
+//faces.forEach(face => console.log(face.scaledMesh));
+
+
+
+async function main()
+{
+	  //stats.showPanel(0);  // 0: fps, 1: ms, 2: mb, 3+: custom
+     // document.getElementById('main').appendChild(stats.dom);
+        // Load the MediaPipe facemesh model assets.
+        const model = await facemesh.load({maxFaces:1});
+        
+        // Pass in a video stream to the model to obtain
+        // a face from the MediaPipe graph.
+        const video = document.querySelector("video");
+        // let hands = await model.estimateHands(video);
+       
+/*
+         scatterGL = new ScatterGL(
+        document.querySelector('#scatter-gl-container'),
+        {'rotateOnStart': false, 'selectEnabled': false});
+*/
+        // Each face object contains a `landmarks` property,
+        // which is an array of 21 3-D landmarks.
+ async function tracking()
+ {
+ 	      stats.begin();
+          let faces = await model.estimateFaces(video);
+
+//↓この位置超重要！！
+    /*   ctx1.clearRect(0, 0, canvas.width, canvas.height); */
+
+
+let faceEntity = document.querySelector('#face');
+let spList = document.querySelectorAll('.sp');
+spList.forEach(sp => sp.parentNode.removeChild(sp));
+
+
+  if (faces.length > 0)
+  {
+    for (let i = 0; i < faces.length; i++)
+    {
+      const keypoints = faces[i].scaledMesh;
+
+/*
+for (let i = 0; i < keypoints.length; i++) 
+       {
+*/
+          let sp = document.createElement("a-plane");
+          let keypointX = keypoints[8][0];
+          let keypointY = keypoints[8][1];
+          let keypointZ = keypoints[8][2] * 2.5;
+          sp.setAttribute("position", `${keypointX} ${keypointY} ${keypointZ}`);
+          sp.className = "sp";
+          //sp.setAttribute("color", "red");
+          sp.setAttribute("src", "#img");
+          sp.setAttribute("scale", "-1 1 1");
+          sp.setAttribute("rotation", "0 180 180");
+          sp.setAttribute("width", "100");
+          sp.setAttribute("height", "100");
+          faceEntity.appendChild(sp);
+
+
+
+
+ /*       }
+
+
+
+/*
+      // Log facial keypoints.
+      for (let i = 0; i < keypoints.length; i++)
+      {
+        //const [x, y, z] = keypoints[i];
+        //console.log(`Keypoint ${i}: [${x}, ${y}, ${z}]`);
+      }
+*/
+    }
+
+
+
+    if (scatterGL != null)
+    {
+      const pointsData = faces.map(face =>
+      {
+        let scaledMesh = face.scaledMesh;
+        return scaledMesh.map(point => ([-point[0], -point[1], -point[2]]));
+      });
+
+      let flattenedPointsData = [];
+      for (let i = 0; i < pointsData.length; i++) {
+        flattenedPointsData = flattenedPointsData.concat(pointsData[i]);
+      }
+      const dataset = new ScatterGL.Dataset(flattenedPointsData);
+
+      if (!scatterGLHasInitialized) {
+        scatterGL.render(dataset);
+      } else {
+        scatterGL.updateDataset(dataset);
+      }
+      scatterGLHasInitialized = true;
+    }
+
+
+
+
+  }
+
+
+ stats.end();
+ requestAnimationFrame(tracking);
+ };
+ tracking();
+}
+
+
+
+</script>
+</html>
+
