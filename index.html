@@ -93,7 +93,7 @@ body {
     width:300px;height:300px;">
     <canvas id="output" crossorigin="anonymous"></canvas>
 
-      <video id="video" playsinline style="
+      <video id="video" muted playsinline style="
         -webkit-transform: scaleX(-1);
         transform: scaleX(-1);
         visibility: hidden;
@@ -504,8 +504,8 @@ async function setupCamera() {
       facingMode: 'user',
       // Only setting the video to a specified size in order to accommodate a
       // point cloud, so on mobile devices accept the default size.
-      width: mobile ? VIDEO_SIZE : VIDEO_SIZE,
-      height: mobile ? VIDEO_SIZE : VIDEO_SIZE} };
+      width: mobile ? undefined : VIDEO_SIZE,
+      height: mobile ? undefined : VIDEO_SIZE} };
 
   const stream = await navigator.mediaDevices.getUserMedia(constraints);
   video.srcObject = stream;
