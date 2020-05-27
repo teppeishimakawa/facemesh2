@@ -52,35 +52,19 @@ body {
   color: white;
   opacity: 0.9;
 }
-
-#loading {
-  left: 450px;
-  top: 100px;
-  width: 300px;
-  height: 300px;
-  position: absolute;
-  z-index: 6;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-  background: transparent;
-  border-style: none;
-  color: red;
-  opacity: 0.9;
-}
 </style>
 </head>
 <body>
-
 <div id="main">
   <div class="container">
     <div class="output_screean">
       <div class="textarea"></div> 
       <div><textarea class="input_text"></textarea></div>
     </div>
+    <div class="canvas-wrapper">
 
-<div id="loading">now loading...</div> 
 
-  <div class="canvas-wrapper">
-   <a-scene background="color: #FAFAFA" stats visible="false" id="scene">
+   <a-scene background="color: #FAFAFA" stats>
     <a-camera look-controls-enabled="false" wasd-controls-enabled="false" position="0 0 0"></a-camera>
     <a-assets>
     <img id="img" src="./cxm.png" style="
@@ -101,11 +85,11 @@ body {
     </a-assets>
 
     <a-plane position="0 1 -4" rotation="0 0 0" scale="-1 1 1" width="4" height="4" src="#video" ></a-plane>
-    <a-entity id="face" position="1.5 3 -3" rotation="0 0 0" scale="-0.01 -0.01 -0.01"></a-entity>
+    <a-entity visible="false"  id="face" position="1.5 3 -3" rotation="0 0 0" scale="-0.01 -0.01 -0.01"></a-entity>
   </a-scene>
+
+    </div>
   </div>
-    
- </div>
 </div>
 
 
@@ -351,6 +335,7 @@ async function main() {
   renderPrediction();  
 }
 
+
 function head_pose_estimation(faces,rightEye,leftEye)
 {
   let fecePoints = tf.tensor(faces);
@@ -470,12 +455,14 @@ async function renderPrediction() {
         ctx.fill();
       }
       head_pose_estimation(annotations.silhouette,rightEyeLower1,leftEyeLower1);
-      document.getElementById("loading").style="display:none"
-      document.getElementById("scene").setAttribute('visible', true);
+      
     });
   }
   requestAnimationFrame(renderPrediction);
 }
+
+
+
 
 function drawPath(ctx, points, closePath) {
   const region = new Path2D();
