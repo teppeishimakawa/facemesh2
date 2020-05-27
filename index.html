@@ -2,6 +2,9 @@
 
 <html>
 <head>
+<meta charset="UTF-8" />
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>facemesh_rot</title>
 <script src="https://cdn.jsdelivr.net/npm/three@0.106.2/build/three.min.js"></script>
 <!--script src="./stats.min.js"></script-->
@@ -93,7 +96,7 @@ body {
     width:300px;height:300px;">
     <canvas id="output" crossorigin="anonymous"></canvas>
 
-      <video id="video" muted playsinline style="
+      <video id="video" muted playsinline webkit-playsinline crossorigin style="
         -webkit-transform: scaleX(-1);
         transform: scaleX(-1);
         visibility: hidden;
@@ -305,6 +308,7 @@ var yaw ,pitch, roll;
 
 
 const state = {
+  backend: 'webgl',
   maxFaces: 1,
   triangulateMesh: true
 };
@@ -327,6 +331,7 @@ const mobile = isMobile();
 
 
 main();
+
 
 async function main() {
   
@@ -361,6 +366,8 @@ function head_pose_estimation(faces,rightEye,leftEye)
   let fecePoints = tf.tensor(faces);
   let eye1 = tf.tensor1d(rightEye);
   let eye2 = tf.tensor1d(leftEye);
+
+  tf.setBackend(state.backend);
 
   let scales = fecePoints.div(tf.norm(eye1.sub(eye2))).mul(0.06);
   let centered = scales.sub(scales.mean(axis=0));
