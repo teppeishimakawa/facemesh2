@@ -11,7 +11,6 @@
 <script src="https://cdn.jsdelivr.net/npm/scatter-gl@0.0.1/lib/scatter-gl.min.js"></script>
 <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
 
-<!--script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script-->
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/facemesh"></script>
@@ -136,6 +135,7 @@ body {
     }
   });
 */
+
 
 const TRIANGULATION= [
     127, 34, 139, 11, 0, 37, 232, 231, 120, 72, 37, 39, 128, 121, 47, 232, 121,
@@ -338,7 +338,7 @@ main();
 
 
 async function main() {
-  
+  await tf.setBackend(state.backend);
   await setupCamera();
 
   video.play();
