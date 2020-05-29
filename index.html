@@ -11,11 +11,16 @@
 <script src="https://cdn.jsdelivr.net/npm/scatter-gl@0.0.1/lib/scatter-gl.min.js"></script>
 <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+
+<!--script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/facemesh"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/facemesh"></script-->
 <!--script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm/dist/tf-backend-wasm.js"></script-->
 
+<!--safariでも動かすため、上記３つのscriptの代わりに、以下３つのscriptにするの超重要-->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm@2.0.0/dist/tf-backend-wasm.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/facemesh@0.0.3"></script>
 
 <style>
 body {
@@ -98,7 +103,7 @@ body {
     width:300px;height:300px;">
     <canvas id="output" crossorigin="anonymous"></canvas>
 
-      <video id="video" muted playsinline crossorigin style="
+      <video id="video" muted playsinline="" style="
         -webkit-transform: scaleX(-1);
         transform: scaleX(-1);
         visibility: hidden;
@@ -333,12 +338,32 @@ const mobile = isMobile();
 
 
 //tf.setBackend('webgl').then(() => main());
-  //tf.setBackend(state.backend);
-main();
+ // tf.setBackend(state.backend);
+
+ //↓safariで実装する上で超重要！
+ tf.setBackend('wasm').then(() => main());
+//main();
 
 
 async function main() {
-  await tf.setBackend(state.backend);
+
+/*
+let backend = new tf.webgl.MathBackendWebGL();
+backend.dispose();
+backend = new tf.webgl.MathBackendWebGL();
+
+const gpgpuContext = tf.ENV.backend['gpgpu']
+new tf.webgl.MathBackendWebGL(gpgpuContext)
+*/
+
+/*
+await tf.registerBackend('webgl', () => {
+    return new tf.webgl.MathBackendWebGL();
+  },1);
+  await tf.setBackend('webgl');
+  //await tf.setBackend(state.backend);
+*/
+
   await setupCamera();
 
   video.play();
@@ -421,7 +446,7 @@ function head_pose_estimation(faces,rightEye,leftEye)
 
 async function renderPrediction() {
 
-  const predictions = await model.estimateFaces(video);
+  const predictions = await model.estimateFaces(video,false);
   ctx.drawImage(
       video, 0, 0, videoWidth, videoHeight, 0, 0, canvas.width, canvas.height);
 
@@ -446,7 +471,7 @@ async function renderPrediction() {
           sp.setAttribute("scale", "-1 1 1");
           //sp.setAttribute("rotation", "0 180 180");
       
-          console.log(`${-(yaw)*180/Math.PI} ${(pitch)*180/Math.PI} ${(-(roll - Math.PI / 2))*180/Math.PI}` );
+          //console.log(`${-(yaw)*180/Math.PI} ${(pitch)*180/Math.PI} ${(-(roll - Math.PI / 2))*180/Math.PI}` );
           sp.setAttribute("rotation",`${-(yaw)*180/Math.PI} ${(pitch)*180/Math.PI} ${-(roll)*180/Math.PI + 90}`);
           sp.setAttribute("width", "100");
           sp.setAttribute("height", "100");
